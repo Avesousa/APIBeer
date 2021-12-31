@@ -59,6 +59,6 @@ this commands stop the services (Mysql and APP).
 
 ## ✍️ Authors <a name = "authors"></a>
 
-- [@kylelobo](https://github.com/Avesousa) - Developer
+- [Avelino Figueira](https://github.com/Avesousa) - Developer
 
 See also the list of [contributors](https://github.com/kylelobo/The-Documentation-Compendium/contributors) who participated in this project.
