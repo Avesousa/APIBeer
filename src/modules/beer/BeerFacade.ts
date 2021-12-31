@@ -18,37 +18,31 @@ export default class BeerFacade {
   public async addBeer(req: Request): Promise<Beer> {
     // ID segun documentacion viene en el request, por eso valido por el
     const { id } = req.body;
-    if(id){
-      if(await this.veryficBeer(id)){
-        const query = this.createInsertQuery(req.body);
-        return this.mysql.query(query).then((response) => {
-          const beer: Beer = req.body;
-          beer.id = response.insertId;
-          return beer;
-        })
+    if (await this.veryficBeer(id)) {
+      const query = this.createInsertQuery(req.body);
+      return this.mysql.query(query).then((response) => {
+        const beer: Beer = req.body;
+        beer.id = response.insertId;
+        return beer;
+      })
         .catch((err) => {
-          console.log('Error addbeer', err);
+          console.log('Error add beer', err);
           throw mapErrorBeer(400, err);
         })
-      }else{
-        throw mapErrorBeer(409);
-      }
-    }else {
-      console.error('ID not found');
-      throw mapErrorBeer(400);
+    } else {
+      throw mapErrorBeer(409);
     }
-    
   }
 
   public async getListBeers(): Promise<Beer[]> {
     return this.mysql
       .query(this.query)
       .then((beers: Beer[]) => beers)
-      .catch((err) => { throw mapErrorBeer(400,err) });
+      .catch((err) => { throw mapErrorBeer(400, err) });
   }
 
   public async getBeer(data: Request | number | string): Promise<Beer> {
-    const id = typeof data == "object"  ? data.params.id : data;
+    const id = typeof data == "object" ? data.params.id : data;
     return this.mysql.query(`${this.query} WHERE id = ${id}`)
       .then((beers: Beer[]) => {
         const beer = beers[0];
@@ -64,7 +58,7 @@ export default class BeerFacade {
     const { id } = req.params;
     return this.getBeer(id)
       .then((beer: Beer) => {
-        if(beer){
+        if (beer) {
           const transaction = {
             from: beer.currency,
             to: currency ? currency.toString() : "EUR",
@@ -75,23 +69,27 @@ export default class BeerFacade {
             .convert(transaction)
             .then((price: number) => { return { priceTotal: price } })
             .catch((err: any) => { throw mapErrorBeer(400, err, "Ha ocurrido un error con el calculo del precio") });
-        }else {
+        } else {
           throw mapErrorBeer(404);
         }
-      }).catch((err) => { throw err });
+      });
   }
 
   private async veryficBeer(id: string): Promise<boolean> {
+    if (id) {
       const beer = await this.getBeer(id);
       return !(!!beer);
+    }
+    console.error('Id not found');
+    throw mapErrorBeer(400);
   }
 
   private createInsertQuery(body: any): string {
     //Utilizo la referencias en minuscula
     const { name, brewery, country, price, currency } = body;
-    if (!!name && !!brewery && !!country && !!price && !!currency){
+    if (!!name && !!brewery && !!country && !!price && !!currency) {
       return `INSERT INTO beer (name, brewery, country, price, currency) VALUES ('${name}','${brewery}','${country}',${price},'${currency}')`;
-    }else{
+    } else {
       console.error('Create insert query', body);
       throw mapErrorBeer(400);
     }
