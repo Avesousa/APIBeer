@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  
+  app: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+      - '/app/node_modules'
+    depends_on:
+      - mysql_server
+
+  mysql_server:
+    image: mysql
+    volumes:
+      - ./script/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_DATABASE=beerChallenge
+      - MYSQL_ROOT_PASSWORD=secret123
+
